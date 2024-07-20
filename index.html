@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synlab Test Bilgileri Arama</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input, button { 
+            padding: 10px; 
+            margin: 10px 0; 
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto; /* Yatay kaydırmayı etkinleştirir */
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 8px; 
+        }
+        .col-i, .col-j { 
+            background-color: #40E0D0; /* I ve J sütunları için turkuaz */
+        } 
+        .col-k, .col-l { 
+            background-color: #AFEEEE; /* K ve L sütunları için açık turkuaz */
+        }
+        th:nth-child(6), td:nth-child(6) {
+            width: 200px; /* F sütunu genişliği 200px olarak ayarlandı */
+        }
+        th:nth-child(8), td:nth-child(8) {
+            width: 275px; /* H sütunu genişliği 275px olarak ayarlandı */
+        }
+        th:nth-child(9), td:nth-child(9) {
+            width: 150px; /* I sütunu genişliği 150px olarak ayarlandı */
+        }
+        th:nth-child(10), td:nth-child(10) {
+            width: 150px; /* J sütunu genişliği 150px olarak ayarlandı */
+        }
+        th:nth-child(11), td:nth-child(11) {
+            width: 150px; /* K sütunu genişliği 150px olarak ayarlandı */
+        }
+        th:nth-child(12), td:nth-child(12) {
+            width: 150px; /* L sütunu genişliği 150px olarak ayarlandı */
+        }
+        .logo { 
+            width: 100%; /* Logonun genişliğini %100 yaparak sütun genişliğine sığmasını sağlar */
+            max-width: 900px; /* Maksimum genişliği ayarlayın */
+            height: auto; /* Otomatik yükseklik ayarı */
+            margin-bottom: 20px; /* Logonun altına boşluk ekler */
+        }
+        .header {
+            width: 100%; /* Başlık bölümünün genişliğini %100 yapar */
+            text-align: center; /* Metni ortalar */
+            margin-bottom: 20px; /* Başlık bölümünün altına boşluk ekler */
+        }
+        .info {
+            font-size: 12pt;
+            font-family: Arial, sans-serif;
+            text-align: center; /* Metni ortalar */
+            margin-bottom: 20px; /* Bilgi bölümü aralığı */
+        }
+        .info a {
+            color: blue;
+            text-decoration: underline;
+        }
+        .info p {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                width: 80%; /* Küçük ekranlarda logo genişliği %80 olarak ayarlanır */
+            }
+        }
+        pre {
+            font-family: Arial, sans-serif;
+            font-size: 12pt;
+            white-space: pre-wrap; /* Keeps the formatting and wraps the text */
+        }
+        /* Pop-up (Modal) için CSS */
+        .modal {
+            display: none; /* Modal başlangıçta gizlidir */
+            position: fixed; /* Sayfanın üzerinde sabitlenir */
+            z-index: 1; /* Ön planda gösterir */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0); /* Arka plan rengi */
+            background-color: rgba(0,0,0,0.4); /* Arka planın yarı saydamlığı */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px; /* Maksimum genişlik */
+            text-align: center;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <img src="https://i.hizliresim.com/cbny99o.png" title="Logo" alt="Logo" class="logo">
+    <div class="header">
+        <h1>Synlab Test Bilgileri Arama</h1>
+    </div>
+    <div class="info">
+        <p>
+            Listede olmayan testler için 
+            <a href="https://extern.synlab.com/Catalog/?idLoc=83" target="_blank">Almanya kataloğumuza</a> 
+            bakıp laboratuvarımızla iletişime geçebilirsiniz. Çağrı Merkezimiz 444 26 29.
+        </p>
+        <p>
+            Synlab Laboratuvarı Kataloglarımızın PDF formatına 
+            <a href="https://www.synlab.com.tr/component/content?view=article&id=1310&Itemid=5370" target="_blank">buradan</a> 
+            ulaşabilirsiniz.
+        </p>
+    </div>
+    <form id="searchForm" onsubmit="event.preventDefault(); searchTestName();">
+        <input type="search" id="searchQuery" placeholder="Arama yapın">
+        <button type="button" onclick="searchTestName()">Test Adı İle Arama</button>
+        <button type="button" onclick="searchTestCode()">Test Kodu İle Arama</button>
+        <button type="button" onclick="searchSynonym()">Sinonim İle Arama</button>
+    </form>
+    <div id="results" class="table-container"></div>
+
+    <!-- Pop-up (Modal) HTML -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>15 Temmuz Pazartesi günü Laboratuvarımız kapalı olacaktır.</p>
+        </div>
+    </div>
+
+    <script>
+        // Pop-up (Modal) için JavaScript
+        var modal = document.getElementById("myModal");
+        var span = document.getElementsByClassName("close")[0];
+
+        // Sayfa yüklendiğinde modal gösterilir
+        window.onload = function() {
+            modal.style.display = "block";
+        };
+
+        // Kapat düğmesine tıklandığında modal gizlenir
+        span.onclick = function() {
+            modal.style.display = "none";
+        };
+
+        // Modal dışında bir yere tıklandığında modal gizlenir
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        function searchData(columnIndex) {
+            var query = document.getElementById('searchQuery').value.toLowerCase();
+            var sheetId = '1MmCmG3ngpB1kDNZif4N4YnnWrYL3vTRAwjsRq0SeMEw';
+            var apiKey = 'AIzaSyDlIZsTBiqixbegvsFBWPpCsZS-cyqfWSo';
+            var range = 'Katalog!A:Z';
+
+            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    var rows = data.values;
+                    var results = rows.filter(row => row[columnIndex] && row[columnIndex].toLowerCase().includes(query));
+                    var table = '<table><tr>' + rows[0].map(cell => `<th>${cell}</th>`).join('') + '</tr>';
+                    results.forEach(row => {
+                        table += '<tr>';
+                        for (let i = 0; i < row.length; i++) {
+                            if (i === 8 && !row[i + 1]) { // I ve J sütunlarını birleştir
+                                table += `<td colspan="2" class="col-i">${row[i]}</td>`;
+                                i++;
+                            } else if (i === 10 && !row[i + 1]) { // K ve L sütunlarını birleştir
+                                table += `<td colspan="2" class="col-k">${row[i]}</td>`;
+                                i++;
+                            } else if (i === 8) { // I sütunu
+                                table += `<td class="col-i">${row[i]}</td>`;
+                            } else if (i === 9) { // J sütunu
+                                table += `<td class="col-j">${row[i]}</td>`;
+                            } else if (i === 10) { // K sütunu
+                                table += `<td class="col-k">${row[i]}</td>`;
+                            } else if (i === 11) { // L sütunu
+                                table += `<td class="col-l">${row[i]}</td>`;
+                            } else if (i === 5) { // F sütunu, <pre> tag is used to preserve formatting
+                                table += `<td><pre>${row[i]}</pre></td>`;
+                            } else {
+                                table += `<td>${row[i] || '&nbsp;'}</td>`;
+                            }
+                        }
+                        table += '</tr>';
+                    });
+                    table += '</table>';
+                    document.getElementById('results').innerHTML = table;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function searchTestCode() {
+            searchData(0); // A sütunu (Test Kodu)
+        }
+
+        function searchTestName() {
+            searchData(1); // B sütunu (Test Adı)
+        }
+
+        function searchSynonym() {
+            searchData(2); // C sütunu (Sinonim)
+        }
+    </script>
+</body>
+</html>
