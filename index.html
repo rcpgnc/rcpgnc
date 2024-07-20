@@ -87,40 +87,6 @@
             font-size: 12pt;
             white-space: pre-wrap; /* Keeps the formatting and wraps the text */
         }
-        /* Pop-up (Modal) için CSS */
-        .modal {
-            display: none; /* Modal başlangıçta gizlidir */
-            position: fixed; /* Sayfanın üzerinde sabitlenir */
-            z-index: 1; /* Ön planda gösterir */
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgb(0,0,0); /* Arka plan rengi */
-            background-color: rgba(0,0,0,0.4); /* Arka planın yarı saydamlığı */
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 600px; /* Maksimum genişlik */
-            text-align: center;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -148,69 +114,40 @@
     </form>
     <div id="results" class="table-container"></div>
 
-    <!-- Pop-up (Modal) HTML -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <p>15 Temmuz Pazartesi günü Laboratuvarımız kapalı olacaktır.</p>
-        </div>
-    </div>
-
     <script>
-        // Pop-up (Modal) için JavaScript
-        var modal = document.getElementById("myModal");
-        var span = document.getElementsByClassName("close")[0];
-
-        // Sayfa yüklendiğinde modal gösterilir
-        window.onload = function() {
-            modal.style.display = "block";
-        };
-
-        // Kapat düğmesine tıklandığında modal gizlenir
-        span.onclick = function() {
-            modal.style.display = "none";
-        };
-
-        // Modal dışında bir yere tıklandığında modal gizlenir
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        };
-
         function searchData(columnIndex) {
             var query = document.getElementById('searchQuery').value.toLowerCase();
             var sheetId = '1MmCmG3ngpB1kDNZif4N4YnnWrYL3vTRAwjsRq0SeMEw';
             var apiKey = 'AIzaSyDlIZsTBiqixbegvsFBWPpCsZS-cyqfWSo';
             var range = 'Katalog!A:Z';
 
-            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`)
+            fetch(https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey})
                 .then(response => response.json())
                 .then(data => {
                     var rows = data.values;
                     var results = rows.filter(row => row[columnIndex] && row[columnIndex].toLowerCase().includes(query));
-                    var table = '<table><tr>' + rows[0].map(cell => `<th>${cell}</th>`).join('') + '</tr>';
+                    var table = '<table><tr>' + rows[0].map(cell => <th>${cell}</th>).join('') + '</tr>';
                     results.forEach(row => {
                         table += '<tr>';
                         for (let i = 0; i < row.length; i++) {
                             if (i === 8 && !row[i + 1]) { // I ve J sütunlarını birleştir
-                                table += `<td colspan="2" class="col-i">${row[i]}</td>`;
+                                table += <td colspan="2" class="col-i">${row[i]}</td>;
                                 i++;
                             } else if (i === 10 && !row[i + 1]) { // K ve L sütunlarını birleştir
-                                table += `<td colspan="2" class="col-k">${row[i]}</td>`;
+                                table += <td colspan="2" class="col-k">${row[i]}</td>;
                                 i++;
                             } else if (i === 8) { // I sütunu
-                                table += `<td class="col-i">${row[i]}</td>`;
+                                table += <td class="col-i">${row[i]}</td>;
                             } else if (i === 9) { // J sütunu
-                                table += `<td class="col-j">${row[i]}</td>`;
+                                table += <td class="col-j">${row[i]}</td>;
                             } else if (i === 10) { // K sütunu
-                                table += `<td class="col-k">${row[i]}</td>`;
+                                table += <td class="col-k">${row[i]}</td>;
                             } else if (i === 11) { // L sütunu
-                                table += `<td class="col-l">${row[i]}</td>`;
+                                table += <td class="col-l">${row[i]}</td>;
                             } else if (i === 5) { // F sütunu, <pre> tag is used to preserve formatting
-                                table += `<td><pre>${row[i]}</pre></td>`;
+                                table += <td><pre>${row[i]}</pre></td>;
                             } else {
-                                table += `<td>${row[i] || '&nbsp;'}</td>`;
+                                table += <td>${row[i] || '&nbsp;'}</td>;
                             }
                         }
                         table += '</tr>';
